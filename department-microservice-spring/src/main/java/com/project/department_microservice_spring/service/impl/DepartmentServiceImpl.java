@@ -26,4 +26,12 @@ public class DepartmentServiceImpl implements DepartmentService {
         // convert department jpa entity to department dto
         return DepartmentMapper.mapToDepartmentDto(savedDepartment);
     }
+
+    @Override
+    public DepartmentDTO getDepartmentByCode(String code) {
+        Department department = departmentRepository.findByDepartmentCode(code);
+
+        // convert department jpa entity to department dto
+        return DepartmentMapper.mapToDepartmentDto(department);
+    }
 }
