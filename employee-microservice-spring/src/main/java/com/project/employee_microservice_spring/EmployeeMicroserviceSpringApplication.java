@@ -16,10 +16,10 @@ public class EmployeeMicroserviceSpringApplication {
 		return new RestTemplate();
 	}*/
 
-	@Bean
+	/*@Bean
 	public WebClient webClient(){
 		return WebClient.builder().build();
-	}
+	}*/
 
 	public static void main(String[] args) {
 		SpringApplication.run(EmployeeMicroserviceSpringApplication.class, args);

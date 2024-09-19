@@ -8,6 +8,7 @@ import com.project.employee_microservice_spring.exception.EmailAlreadyExistsExce
 import com.project.employee_microservice_spring.exception.ResourceNotFoundException;
 import com.project.employee_microservice_spring.mapper.EmployeeMapper;
 import com.project.employee_microservice_spring.repository.EmployeeRepository;
+import com.project.employee_microservice_spring.service.ApiClient;
 import com.project.employee_microservice_spring.service.EmployeeService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     public EmployeeRepository employeeRepository;
 //    private RestTemplate restTemplate;
-    private WebClient webClient;
+//    private WebClient webClient;
+    private ApiClient apiClient;
 
     @Override
     public EmployeeDto saveEmployee(EmployeeDto employeeDto) {
@@ -49,14 +51,19 @@ public class EmployeeServiceImpl implements EmployeeService {
                 () -> new ResourceNotFoundException("Employee does not exists")
         );
 
+        // RestTemplate
         /*ResponseEntity<DepartmentDto> responseEntity = restTemplate.getForEntity("http://localhost:8080/api/departments/getDepartmentByCode/" + employee.getDepartmentCode(), DepartmentDto.class);
         DepartmentDto departmentDto = responseEntity.getBody();*/
 
-        DepartmentDto departmentDto = webClient.get()
+        // WebClient
+        /*DepartmentDto departmentDto = webClient.get()
                 .uri("http://localhost:8080/api/departments/getDepartmentByCode/" + employee.getDepartmentCode())
                 .retrieve()
                 .bodyToMono(DepartmentDto.class)
-                .block();
+                .block();*/
+
+        //OpenFeign Call
+        DepartmentDto departmentDto = apiClient.getDepartment(employee.getDepartmentCode());
 
         EmployeeDto employeeDto = EmployeeMapper.mapToEmployeeDto(employee);
 
