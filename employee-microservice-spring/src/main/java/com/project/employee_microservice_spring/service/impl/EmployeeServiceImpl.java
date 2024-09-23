@@ -10,6 +10,7 @@ import com.project.employee_microservice_spring.mapper.EmployeeMapper;
 import com.project.employee_microservice_spring.repository.EmployeeRepository;
 import com.project.employee_microservice_spring.service.ApiClient;
 import com.project.employee_microservice_spring.service.EmployeeService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
 
+    @CircuitBreaker(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
     @Override
     public ApiResponseDto getEmployeeById(Long employeeId) {
 
@@ -64,6 +66,28 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         //OpenFeign Call
         DepartmentDto departmentDto = apiClient.getDepartment(employee.getDepartmentCode());
+
+        EmployeeDto employeeDto = EmployeeMapper.mapToEmployeeDto(employee);
+
+        ApiResponseDto apiResponseDto = new ApiResponseDto();
+        apiResponseDto.setEmployeeDto(employeeDto);
+        apiResponseDto.setDepartmentDto(departmentDto);
+
+        return apiResponseDto;
+
+    }
+
+    public ApiResponseDto getDefaultDepartment(Long employeeId, Exception exception) {
+
+
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(
+                () -> new ResourceNotFoundException("Employee does not exists")
+        );
+
+        DepartmentDto departmentDto = new DepartmentDto();
+        departmentDto.setDepartmentName("R & D");
+        departmentDto.setDepartmentCode("RD007");
+        departmentDto.setDepartmentDescription("Research and Developement");
 
         EmployeeDto employeeDto = EmployeeMapper.mapToEmployeeDto(employee);
 
