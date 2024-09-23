@@ -11,7 +11,10 @@ import com.project.employee_microservice_spring.repository.EmployeeRepository;
 import com.project.employee_microservice_spring.service.ApiClient;
 import com.project.employee_microservice_spring.service.EmployeeService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -27,6 +30,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 //    private RestTemplate restTemplate;
 //    private WebClient webClient;
     private ApiClient apiClient;
+    private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(EmployeeServiceImpl.class);
 
     @Override
     public EmployeeDto saveEmployee(EmployeeDto employeeDto) {
@@ -44,11 +48,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
 
-    @CircuitBreaker(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
+//    @CircuitBreaker(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
+    @Retry(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
     @Override
     public ApiResponseDto getEmployeeById(Long employeeId) {
 
 
+        LOGGER.info("inside getEmployeeById() method");
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(
                 () -> new ResourceNotFoundException("Employee does not exists")
         );
@@ -80,6 +86,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public ApiResponseDto getDefaultDepartment(Long employeeId, Exception exception) {
 
 
+        LOGGER.info("inside getDefaultDepartment() method");
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(
                 () -> new ResourceNotFoundException("Employee does not exists")
         );
